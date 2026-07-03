@@ -98,6 +98,11 @@ out/                    shortlist.json -> befunde.json + report.md
   cleanly and they can be bought. Median views of recent posts measure actual reach.
 - **Fail-closed fact-checking.** Only what the evidence search actually returned gets
   cited. `UNVERIFIED` beats a hallucinated study.
+- **Adversarial check before red.** A wrong red verdict is the most expensive mistake —
+  it becomes public reaction content. So every red requires a documented counter-check
+  (`gegenprobe`): defend the claim with the same evidence first; if the defense holds
+  even partially, it's yellow. Search queries are logged per finding (`evidenz_queries`),
+  so an `UNVERIFIED` shows *how* it was searched, not just that nothing was found.
 - **One platform done well over three done shakily.** Viral clips are almost always
   cross-posted; covering TikTok catches the IG/Shorts mirrors by content.
 

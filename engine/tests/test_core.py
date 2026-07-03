@@ -40,8 +40,8 @@ def test_ampel_normalises():
     assert _ampel("bogus") == "⚪"                          # unknown -> ⚪, never an empty string
 
 
-def _befund(ampel="rot", react_score=100, belege=None):
-    return {
+def _befund(ampel="rot", react_score=100, belege=None, **extra):
+    b = {
         "video": {"id": "1", "url": "http://x", "title": "T", "handle": "h", "age_days": 1.0},
         "hitze": {"views": 100, "velocity": 50, "heat": 60, "baseline_views": 90},
         "claim": "c", "claim_paraphrase": "p",
@@ -50,6 +50,8 @@ def _befund(ampel="rot", react_score=100, belege=None):
         "belege": belege if belege is not None else [], "react_score": react_score,
         "status": "neu",
     }
+    b.update(extra)
+    return b
 
 
 def _render(befunde):
@@ -73,6 +75,23 @@ def test_render_empty_belege_footer_matches_verdict():
     md = _render([_befund(ampel="rot")])                   # contract violation: rot without evidence
     assert "→ UNVERIFIED" not in md
     assert "Vertrag verletzt" in md
+
+
+def test_render_gegenprobe_required_for_rot():
+    md = _render([_befund(ampel="rot", gegenprobe="stärkstes Pro-Argument trägt nicht, weil X")])
+    assert "Gegenprobe (bestanden):" in md
+    md = _render([_befund(ampel="rot")])                   # rot without gegenprobe -> flagged
+    assert "Gegenprobe:** ⚠️ fehlt" in md
+    md = _render([_befund(ampel="gelb")])                  # non-rot verdicts don't need one
+    assert "Gegenprobe" not in md
+
+
+def test_render_evidenz_queries_audit_line():
+    md = _render([_befund(ampel="unverified",
+                          evidenz_queries=["detox diets toxin elimination", "juice cleanse RCT"])])
+    assert "Suchanfragen: detox diets toxin elimination · juice cleanse RCT" in md
+    md = _render([_befund(ampel="gelb")])                  # absent field renders nothing (old befunde)
+    assert "Suchanfragen" not in md
 
 
 if __name__ == "__main__":

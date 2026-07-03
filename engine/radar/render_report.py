@@ -41,6 +41,13 @@ def render(befunde_path: str) -> str:
                    f"{'· MisRAT: '+', '.join(flags) if flags else '· keine MisRAT-Flags'}  ")
         out.append(f"{f['begruendung']}")
         out.append("")
+        if _ampel_key(f["ampel"]) == "rot":
+            if f.get("gegenprobe"):
+                out.append(f"**Gegenprobe (bestanden):** {f['gegenprobe']}")
+            else:
+                out.append("**Gegenprobe:** ⚠️ fehlt — ein Rot ohne Gegenprobe ist "
+                           "vertragswidrig, Verdikt prüfen")
+            out.append("")
         if f["belege"]:
             out.append("**Belege:**")
             for q in f["belege"]:
@@ -52,6 +59,9 @@ def render(befunde_path: str) -> str:
             # contract violation: every non-unverified verdict needs evidence
             out.append("**Belege:** ⚠️ keine angegeben — dieses Verdikt braucht Belege "
                        "(Vertrag verletzt, Befund prüfen)")
+        if f.get("evidenz_queries"):
+            out.append("")
+            out.append(f"*Suchanfragen: {' · '.join(f['evidenz_queries'])}*")
         out.append("")
         out.append("---")
         out.append("")

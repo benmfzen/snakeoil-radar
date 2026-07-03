@@ -84,6 +84,10 @@ cd engine && python3 -m radar.evidence "english search terms for the claim"
 - Das Modul bevorzugt Meta-Analysen/Systematic Reviews (höchste Evidenzstufe).
 - Lies die zurückgegebenen Abstracts wirklich — das Verdikt muss aus dem Abstract-Inhalt
   folgen, nicht aus dem Titel.
+- **Jede Query protokollieren** — auch die, die nichts brachten. Sie wandern als
+  `evidenz_queries` in den Befund. Das unterscheidet „dazu gibt es keine Literatur"
+  von „ich habe schlecht gesucht": ein UNVERIFIED ohne dokumentierte Suchversuche
+  ist nichts wert, eines mit 3 sauberen Queries ist ein Ergebnis.
 
 ### Schritt 4 — Verdikt (Ampel)
 
@@ -95,6 +99,16 @@ cd engine && python3 -m radar.evidence "english search terms for the claim"
 
 Der `ampel`-Wert in `befunde.json` ist immer ASCII/klein: `rot` · `gelb` · `gruen` · `unverified`
 (nicht „grün"/„UNVERIFIED" — der Renderer normalisiert zwar, aber der Vertrag ist eindeutig).
+
+**Gegenprobe vor jedem 🔴 (nicht verhandelbar).** Ein falsches Rot ist der teuerste
+Fehler des Radars — es wird öffentlicher Reaktions-Content. Bevor du ein Rot festschreibst,
+wechsle die Rolle: **Verteidige den Claim mit derselben Evidenz, die du gerade gelesen
+hast.** Was ist das stärkste ehrliche Argument dafür, dass der Creator recht haben könnte
+(Teilpopulation? Dosis? eine Studie, die in die andere Richtung zeigt)?
+- Trägt die Verteidigung auch nur teilweise → **kein Rot**, sondern gelb + Kontext.
+- Trägt sie nicht → Rot steht, und du schreibst das Ergebnis in `gegenprobe`:
+  das stärkste Pro-Claim-Argument und warum es das Verdikt nicht kippt (1–2 Sätze).
+Ein Rot ohne `gegenprobe` ist vertragswidrig — der Renderer flaggt es.
 
 Für 🔴/🟡 zusätzlich: **react_score = heat × Schwere** (Schwere: rot=3, gelb=1.5) —
 das ist die Reihenfolge, in der eine Reaktion lohnt.
@@ -115,6 +129,8 @@ das ist die Reihenfolge, in der eine Reaktion lohnt.
       "misrat": {"ungenauigkeit": true, "auslassung": false, "rahmung": true},
       "ampel": "rot",              // GENAU einer von: "rot" | "gelb" | "gruen" | "unverified" (ASCII, klein)
       "begruendung": "2–3 Sätze: warum das Verdikt",
+      "gegenprobe": "NUR bei rot (dort Pflicht): stärkstes Pro-Claim-Argument und warum es nicht trägt",
+      "evidenz_queries": ["alle radar.evidence-Queries, auch erfolglose"],
       "belege": [
         {"pmid": "25522674", "titel": "…", "jahr": "2015", "typ": "Review",
          "url": "https://pubmed.ncbi.nlm.nih.gov/25522674/",
