@@ -40,6 +40,41 @@ def test_ampel_normalises():
     assert _ampel("bogus") == "⚪"                          # unknown -> ⚪, never an empty string
 
 
+def _befund(ampel="rot", react_score=100, belege=None):
+    return {
+        "video": {"id": "1", "url": "http://x", "title": "T", "handle": "h", "age_days": 1.0},
+        "hitze": {"views": 100, "velocity": 50, "heat": 60, "baseline_views": 90},
+        "claim": "c", "claim_paraphrase": "p",
+        "misrat": {"ungenauigkeit": True, "auslassung": False, "rahmung": False},
+        "ampel": ampel, "begruendung": "b",
+        "belege": belege if belege is not None else [], "react_score": react_score,
+        "status": "neu",
+    }
+
+
+def _render(befunde):
+    import json, os, tempfile
+    from radar.render_report import render
+    p = os.path.join(tempfile.mkdtemp(), "befunde.json")
+    with open(p, "w", encoding="utf-8") as fh:
+        json.dump({"befunde": befunde, "uebersprungen": []}, fh)
+    return render(p)
+
+
+def test_render_sort_survives_null_react_score():
+    # regression: explicit react_score:null next to numbers crashed sorted()
+    md = _render([_befund(react_score=None, ampel="unverified"), _befund(react_score=500)])
+    assert md.index("react_score: 500") < md.index("react_score: ?")   # null sorts last
+
+
+def test_render_empty_belege_footer_matches_verdict():
+    md = _render([_befund(ampel="unverified")])
+    assert "→ UNVERIFIED" in md
+    md = _render([_befund(ampel="rot")])                   # contract violation: rot without evidence
+    assert "→ UNVERIFIED" not in md
+    assert "Vertrag verletzt" in md
+
+
 if __name__ == "__main__":
     tests = [(n, f) for n, f in sorted(globals().items()) if n.startswith("test_") and callable(f)]
     for name, fn in tests:

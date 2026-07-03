@@ -9,15 +9,19 @@ def _n(x):
     return f"{x:,}" if isinstance(x, (int, float)) and not isinstance(x, bool) else str(x if x is not None else "?")
 
 
-def _ampel(v):
+def _ampel_key(v) -> str:
     """Normalise the verdict key so 'grün', 'GRÜN', 'UNVERIFIED' etc. still map."""
-    k = str(v).strip().lower().replace("ü", "ue").replace("ä", "ae").replace("ö", "oe")
-    return AMPEL.get(k, "⚪")
+    return str(v).strip().lower().replace("ü", "ue").replace("ä", "ae").replace("ö", "oe")
+
+
+def _ampel(v):
+    return AMPEL.get(_ampel_key(v), "⚪")
 
 
 def render(befunde_path: str) -> str:
     d = json.load(open(befunde_path, encoding="utf-8"))
-    b = sorted(d["befunde"], key=lambda x: x.get("react_score", 0), reverse=True)
+    # `or 0`, not a .get default: an explicit react_score:null must not break the sort
+    b = sorted(d["befunde"], key=lambda x: x.get("react_score") or 0, reverse=True)
     out = ["# snakeoil-radar — Befund-Report", ""]
     out.append(f"*{len(b)} Befunde · nach react_score sortiert (Hitze × Schwere)*")
     out.append("")
@@ -42,8 +46,12 @@ def render(befunde_path: str) -> str:
             for q in f["belege"]:
                 out.append(f"- [{q['jahr']}] [{q['titel']}]({q['url']}) "
                            f"*({q['typ']})* — {q['kernaussage']}")
-        else:
+        elif _ampel_key(f["ampel"]) == "unverified":
             out.append("**Belege:** ⚪ keine belastbare Evidenz gefunden → UNVERIFIED")
+        else:
+            # contract violation: every non-unverified verdict needs evidence
+            out.append("**Belege:** ⚠️ keine angegeben — dieses Verdikt braucht Belege "
+                       "(Vertrag verletzt, Befund prüfen)")
         out.append("")
         out.append("---")
         out.append("")
