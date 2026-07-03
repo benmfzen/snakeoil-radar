@@ -1,9 +1,9 @@
 ---
-name: claim-radar
+name: snakeoil-radar
 description: Reaktions-Radar für virale Falschaussagen auf TikTok. Beobachtet eine selbst gepflegte Watchlist von Creator-Handles, rankt frische Videos nach Hitze (Velocity × Account-Baseline), extrahiert prüfbare Aussagen und checkt sie gegen echte PubMed-Literatur — Ampel-Verdikt nur mit abrufbarer Quelle, sonst UNVERIFIED. Nutzen bei: "was ist gerade viral falsch?", "worauf soll ich reagieren?", Faktencheck von Creator-Videos.
 ---
 
-# claim-radar — virale Falschaussagen finden, bevor alle anderen reagiert haben
+# snakeoil-radar — virale Falschaussagen finden, bevor alle anderen reagiert haben
 
 Du (Claude) bist hier der Faktencheck-Redakteur. Die Scripts liefern dir deterministisch
 die heißen Videos samt Transkript; **deine** Arbeit ist das Urteil — und für das Urteil
@@ -22,13 +22,20 @@ gilt ein hartes Gesetz:
 ## Setup & Onboarding (einmalig)
 
 1. Voraussetzungen: `python3`, `yt-dlp`, `curl` (alles kostenlos, keine API-Keys).
-2. `config/config.example.json` → `config/config.json` kopieren.
-3. **Watchlist füllen — das macht der Nutzer, nicht du.** Die Liste wird bewusst leer
+2. **Whisper einmalig ziehen** (optional, aber empfohlen — schließt die Caption-Lücke):
+   ```bash
+   cd engine && python3 -m radar.setup        # installiert faster-whisper + lädt das Modell
+   ```
+   Läuft komplett lokal, kein API-Key, keine Credits. Der Skill zieht das Whisper-Modell
+   dabei selbst (einmaliger Download, danach gecacht). Ohne diesen Schritt funktioniert
+   der Radar auch — Videos ohne Captions werden dann nur übersprungen statt transkribiert.
+3. `config/config.example.json` → `config/config.json` kopieren.
+4. **Watchlist füllen — das macht der Nutzer, nicht du.** Die Liste wird bewusst leer
    ausgeliefert: Wen man beobachtet, ist eine redaktionelle Entscheidung. Frage den
    Nutzer beim ersten Lauf: *"Welche Creator-Handles (TikTok) soll ich beobachten?
    Profil-Links oder @handles reichen."* Trage sie in `config/config.json` ein.
    Schlage NIEMALS von dir aus konkrete Accounts als "Falschinformations-Quellen" vor.
-4. Optional ein Themen-Preset wählen/anlegen (`presets/`) — es liefert dir Domänen-
+5. Optional ein Themen-Preset wählen/anlegen (`presets/`) — es liefert dir Domänen-
    Vokabular für Claim-Erkennung und PubMed-Suchbegriffe. Ohne Preset: generisch arbeiten.
 
 ## Der Prozess
@@ -41,8 +48,10 @@ cd engine && python3 -m radar.pipeline --config ../config/config.json --out ../o
 
 Ergebnis: `out/shortlist.json` — die Top-N frischen Videos, heat-gerankt
 (`heat = velocity × (1+engagement) × rel_reach`), mit Transkripten.
-Videos mit `transcript_status: no_captions` sind meist <1 Tag alt (TikTok generiert
-Captions verzögert) — führe sie im Report als "zu früh, später erneut prüfen" auf.
+Ist `whisper_fallback` aktiv (Standard), transkribiert lokales Whisper caption-lose
+Videos automatisch (`transcript_status: whisper-de`) — die Lücke schließt sich also
+selbst. Bleibt trotzdem ein `no_captions` (z. B. Whisper nicht installiert), führe
+das Video als "zu früh / kein Transkript, später erneut prüfen" auf.
 
 ### Schritt 2 — Claims extrahieren (deine Arbeit)
 
@@ -135,6 +144,7 @@ Video-Link, Hitze-Zahlen, Claim-Zitat, Ampel + Begründung, Belege als klickbare
   redaktioneller Prozess — neue Accounts kommen dazu, wenn sie auffallen.
 - Follower-Zahlen liefert TikTok nicht sauber → Account-Relevanz = Median der Views
   der letzten Posts (`baseline_views`), was ohnehin schwerer zu faken ist.
-- Sehr frische Videos (<~1 Tag) haben oft noch keine Captions → nächster Lauf.
+- Sehr frische Videos (<~1 Tag) haben oft noch keine Captions → lokales Whisper
+  springt ein (falls installiert), sonst nächster Lauf.
 - IG Reels sind meist Spiegelungen derselben TikToks — eine Plattform sauber schlägt
   zwei Plattformen wackelig.

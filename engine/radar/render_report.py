@@ -7,7 +7,7 @@ AMPEL = {"rot": "🔴", "gelb": "🟡", "gruen": "🟢", "unverified": "⚪"}
 def render(befunde_path: str) -> str:
     d = json.load(open(befunde_path, encoding="utf-8"))
     b = sorted(d["befunde"], key=lambda x: x.get("react_score", 0), reverse=True)
-    out = ["# claim-radar — Befund-Report", ""]
+    out = ["# snakeoil-radar — Befund-Report", ""]
     out.append(f"*{len(b)} Befunde · nach react_score sortiert (Hitze × Schwere)*")
     out.append("")
     for i, f in enumerate(b, 1):

@@ -1,6 +1,9 @@
-# claim-radar
+# 🐍 snakeoil-radar
 
-**Ein Reaktions-Radar für virale Falschaussagen — als Claude-Code-Skill, nicht als App.**
+**Ein Reaktions-Radar für viralen Gesundheits-Bullshit — als Claude-Code-Skill, nicht als App.**
+
+Spürt „Snake Oil" auf: reichweitenstarke Videos mit Falschaussagen, bevor alle anderen
+reagiert haben — und hält jede Behauptung gegen echte Studien, statt gegen Bauchgefühl.
 
 Beobachtet eine selbst gepflegte **Watchlist** von TikTok-Creator-Handles, rankt deren
 frische Videos nach Hitze (Views-Velocity × Engagement × Account-Baseline), zieht
@@ -22,6 +25,7 @@ Regeln. Wächst mit, statt zu verrotten.
 ```bash
 # 1. Voraussetzungen (einmalig)
 pip install -U yt-dlp        # curl + python3 sind auf macOS/Linux schon da
+cd engine && python3 -m radar.setup   # optional: zieht lokales Whisper (gratis, kein Key)
 
 # 2. Config anlegen — Watchlist ist bewusst LEER, du trägst deine Handles selbst ein
 cp config/config.example.json config/config.json
@@ -46,7 +50,8 @@ config/config.json      deine Watchlist (Onboarding, nie mitgeliefert)
 engine/radar/
   discovery.py          Profil-Feeds je Handle (yt-dlp) — die "offene Tür"
   triage.py             Heat = velocity × (1+engagement) × rel_reach; Frische-Filter
-  transcript.py         TikTok-eigene Captions -> Text (kein STT nötig)
+  transcript.py         TikTok-Captions -> Text; lokales Whisper-Fallback ohne Captions
+  setup.py              zieht faster-whisper + Modell (einmalig, on-device, gratis)
   evidence.py           PubMed E-utilities: Meta-Analysen/Reviews bevorzugt, fail-closed
   pipeline.py           CLI: alles bis shortlist.json
 SKILL.md                der eigentliche "Code": der Prozess für den Agenten
@@ -68,7 +73,8 @@ out/                    shortlist.json -> befunde.json + report.md
 
 ## Grenzen
 
-Sehr frische Videos (<1 Tag) haben oft noch keine Captions (nächster Lauf).
+Sehr frische Videos (<1 Tag) haben oft noch keine Captions — lokales Whisper
+transkribiert sie dann on-device (gratis), sonst greift der nächste Lauf.
 Völlig neue Accounts erscheinen erst, wenn sie auf die Watchlist kommen.
 PubMed deckt Biomedizin ab — für andere Domänen (Finanzen etc.) das Evidenz-Modul
 gegen eine passende Quelle tauschen (der Rest des Prozesses bleibt identisch).

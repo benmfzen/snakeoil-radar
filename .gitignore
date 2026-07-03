@@ -1,5 +1,14 @@
+# Private / redaktionelle Daten — NIE veröffentlichen
 private/
-out/
 config/config.json
+
+# Alle Output-Ordner (enthalten reale Watchlist-Handles + Befunde)
+out/
+out_*/
+
+# App-Frontend (privates CW-Deliverable, nicht Teil des öffentlichen Skills)
+web-proto/
+
+# Python
 __pycache__/
 *.pyc

@@ -5,5 +5,9 @@
   "max_age_days": 14,
   "top_n": 8,
   "caption_lang_preference": [],
-  "_hinweis_captions": "Optional: bevorzugte Caption-Sprachen, z.B. [\"deu\",\"de\"] — TikTok liefert bei nicht-englischen Creators sonst die verstümmelte Auto-Übersetzung."
+  "_hinweis_captions": "Optional: bevorzugte Caption-Sprachen, z.B. [\"deu\",\"de\"] — TikTok liefert bei nicht-englischen Creators sonst die verstümmelte Auto-Übersetzung.",
+  "whisper_fallback": true,
+  "whisper_lang": "de",
+  "whisper_model": "small",
+  "_hinweis_whisper": "Wenn ein Video keine Captions hat, transkribiert lokales Whisper den Ton (gratis, kein API-Key). Beim ersten Lauf zieht der Skill das Modell selbst (setup: python3 -m radar.setup). whisper_model: tiny/base/small/medium — small ist ein guter DE-Kompromiss."
 }

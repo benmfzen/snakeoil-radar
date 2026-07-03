@@ -1,6 +1,6 @@
 # Preset: Ernährung (DE)
 
-Domänen-Vokabular für claim-radar im deutschsprachigen Ernährungs-/Abnehm-Space.
+Domänen-Vokabular für snakeoil-radar im deutschsprachigen Ernährungs-/Abnehm-Space.
 Ein Preset ändert nichts am Prozess — es macht dich (Claude) schneller und präziser
 bei Schritt 2 (Claim-Erkennung) und Schritt 3 (PubMed-Suchbegriffe).
 

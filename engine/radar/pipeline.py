@@ -1,6 +1,6 @@
 """Pipeline CLI — watchlist -> discovery -> triage -> transcripts -> shortlist.json
 
-This is the deterministic half of claim-radar. It produces `shortlist.json`:
+This is the deterministic half of snakeoil-radar. It produces `shortlist.json`:
 the hot, fresh videos WITH transcripts, ready for the agent-driven half
 (claim extraction + evidence grounding + verdict -> befunde.json).
 
@@ -47,8 +47,14 @@ def run(config: dict, out_dir: str) -> dict:
 
     print(f"[3/3] Transkripte für Top {len(feed)} …", file=sys.stderr)
     langs = config.get("caption_lang_preference", [])
+    use_whisper = config.get("whisper_fallback", False)
     for v in feed:
-        t = fetch_transcript(v["url"], lang_preference=langs)
+        t = fetch_transcript(
+            v["url"], lang_preference=langs,
+            whisper_fallback=use_whisper,
+            whisper_lang=config.get("whisper_lang", "de"),
+            whisper_model=config.get("whisper_model", "small"),
+        )
         v["transcript"] = t if t.get("ok") else None
         v["transcript_status"] = t.get("lang") if t.get("ok") else t.get("reason", "no_captions")
         print(f"   {v['id']}: {v['transcript_status']}", file=sys.stderr)

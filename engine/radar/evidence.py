@@ -8,7 +8,7 @@ invent a citation. (Same fail-closed pattern as the Warhammer verify.py gate.)
 import json, time, subprocess, urllib.parse
 
 BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
-UA = "claim-radar/0.1 (research tool)"
+UA = "snakeoil-radar/0.1 (research tool)"
 
 
 def _get(url: str, timeout: int = 30) -> bytes:
