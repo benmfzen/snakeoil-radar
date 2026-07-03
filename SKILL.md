@@ -50,7 +50,16 @@ Lies jedes Transkript und ziehe **prüfbare Tatsachenbehauptungen** heraus — k
 Meinungen, keine Erfahrungsberichte. Ein Claim ist prüfbar, wenn eine Studie ihn
 stützen oder widerlegen könnte. Notiere je Claim das wörtliche Transkript-Zitat.
 
-Bewerte jeden Claim entlang der drei Diet-MisRAT-Merkmale:
+**Satire-/Kontext-Check ZUERST (nicht verhandelbar).** Bevor du irgendeinen Claim
+faktencheckst: Ist das Video ernst gemeint? Parodie, Ironie und Satire imitieren
+Falschaussagen absichtlich — ein Keyword-Checker würde „hochfrequenter Honig heilt
+Leberflecks" als rot flaggen und den Witz verpassen. Achte auf Signale: explizite
+Selbstbezeichnung ("Parodie", "Satire"), absurde Übertreibung, Deadpan-Comedy,
+Bio/Kommentare. Ist es Satire/Parodie → NICHT als Befund werten, sondern als
+`satire` markieren und überspringen. Genau hier schlägt der lesende Agent den
+dummen Automaten — das ist der Kern des Tools.
+
+Bewerte jeden (ernst gemeinten) Claim entlang der drei Diet-MisRAT-Merkmale:
 1. **Ungenauigkeit** — ist die Aussage sachlich falsch oder stark verzerrt?
 2. **Gefährliche Auslassung** — fehlt Kontext, ohne den die Aussage schadet (Dosis, Zielgruppe, Risiken)?
 3. **Manipulative Rahmung** — Angst/Ekel/Verschwörung als Vehikel ("Gift", "die verschweigen dir…")?
