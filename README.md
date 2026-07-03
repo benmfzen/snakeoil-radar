@@ -1,5 +1,11 @@
 # 🐍 snakeoil-radar
 
+![license](https://img.shields.io/badge/license-MIT-green.svg)
+![python](https://img.shields.io/badge/python-3.8+-blue.svg)
+![api keys](https://img.shields.io/badge/API%20keys-none-brightgreen.svg)
+![cost](https://img.shields.io/badge/cost-free-brightgreen.svg)
+![Claude Code](https://img.shields.io/badge/Claude%20Code-skill-8A2BE2.svg)
+
 **A reaction radar for viral health misinformation — as a Claude Code skill.**
 
 Watches a self-maintained **watchlist** of TikTok creator handles, ranks their fresh
@@ -9,6 +15,38 @@ verdict (🟢🟡🔴) is only issued with a retrievable source (PMID + link); o
 claim is marked `UNVERIFIED`.
 
 Free to run: `yt-dlp` + `curl` + PubMed E-utilities. No API keys, no subscriptions.
+
+## Example output
+
+One finding from `out/report.md` (handle anonymized):
+
+```markdown
+## 🟡 Baking soda removes "99% of all pesticides" from produce
+@example_creator · "Removing pesticides from fruit?"
+👁 4,013 views · ⚡ 33,442/day · 🌡 heat 38,743 · baseline 3,580 · 0.1d old
+react_score: 58,114
+
+> "Studies show you can remove up to 99% of all pesticides from your fruit and
+>  vegetables with baking soda — sodium bicarbonate even works better than
+>  washing with water or vinegar."
+
+Verdict 🟡 YELLOW · MisRAT: inaccuracy, dangerous omission
+
+True core, dangerously truncated. The study this echoes (Yang et al. 2017) found a
+baking-soda solution removes SURFACE pesticides better than tap water or bleach — but
+it took 12–15 min of soaking, and 4–20% of the pesticide had penetrated into the fruit
+and could not be washed off at all. "99% of all pesticides" overstates it; systemic
+residues remain. "Better than vinegar" was never even tested.
+
+Evidence:
+- [2017] Effectiveness of Commercial and Homemade Washing Agents in Removing Pesticide
+  Residues on and in Apples — Evaluation Study, PMID 29067814
+  → Sodium bicarbonate removes surface pesticides best (vs. water/bleach); needs
+    12–15 min; 4–20% penetrate the fruit and are not washable.
+```
+
+Every verdict carries a PMID + link. A claim with no retrievable evidence comes back
+`UNVERIFIED` — never guessed.
 
 ## Quickstart
 
