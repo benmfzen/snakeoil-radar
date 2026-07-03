@@ -1,0 +1,6 @@
+# Runtime dependency for discovery + transcripts. curl + Python stdlib cover the rest.
+yt-dlp>=2024.1.1
+
+# faster-whisper (optional, local speech-to-text fallback for caption-less videos)
+# is pulled on demand — no need to install it by hand:
+#   cd engine && python3 -m radar.setup

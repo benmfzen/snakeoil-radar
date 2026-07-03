@@ -89,9 +89,12 @@ cd engine && python3 -m radar.evidence "english search terms for the claim"
 
 - 🔴 **rot** — klare Falschaussage; Evidenz widerspricht direkt.
 - 🟡 **gelb** — Kern übertrieben/verzerrt oder gefährlich verkürzt; Evidenz gemischt.
-- 🟢 **grün** — Aussage hält der Literatur stand (auch das festhalten! Glaubwürdigkeit
-  entsteht durch bestätigte Wahrheiten, nicht nur durch Widerlegungen).
-- ⚪ **UNVERIFIED** — keine belastbare Evidenz gefunden. Ehrlich ausweisen, nie raten.
+- 🟢 **grün** (`ampel: "gruen"`) — Aussage hält der Literatur stand (auch das festhalten!
+  Glaubwürdigkeit entsteht durch bestätigte Wahrheiten, nicht nur durch Widerlegungen).
+- ⚪ **UNVERIFIED** (`ampel: "unverified"`) — keine belastbare Evidenz gefunden. Ehrlich ausweisen, nie raten.
+
+Der `ampel`-Wert in `befunde.json` ist immer ASCII/klein: `rot` · `gelb` · `gruen` · `unverified`
+(nicht „grün"/„UNVERIFIED" — der Renderer normalisiert zwar, aber der Vertrag ist eindeutig).
 
 Für 🔴/🟡 zusätzlich: **react_score = heat × Schwere** (Schwere: rot=3, gelb=1.5) —
 das ist die Reihenfolge, in der eine Reaktion lohnt.
@@ -110,7 +113,7 @@ das ist die Reihenfolge, in der eine Reaktion lohnt.
       "claim": "wörtliches Zitat aus dem Transkript",
       "claim_paraphrase": "die Behauptung in einem Satz",
       "misrat": {"ungenauigkeit": true, "auslassung": false, "rahmung": true},
-      "ampel": "rot",
+      "ampel": "rot",              // GENAU einer von: "rot" | "gelb" | "gruen" | "unverified" (ASCII, klein)
       "begruendung": "2–3 Sätze: warum das Verdikt",
       "belege": [
         {"pmid": "25522674", "titel": "…", "jahr": "2015", "typ": "Review",
@@ -125,8 +128,16 @@ das ist die Reihenfolge, in der eine Reaktion lohnt.
 }
 ```
 
-**`out/report.md`** — menschenlesbar: Befunde nach `react_score` sortiert, je Befund
-Video-Link, Hitze-Zahlen, Claim-Zitat, Ampel + Begründung, Belege als klickbare Links.
+**`out/report.md`** — menschenlesbar, wird **deterministisch** aus `befunde.json` gerendert
+(so kann der Report nie von den Daten abweichen):
+
+```bash
+cd engine && python3 -m radar.render_report ../out/befunde.json
+```
+
+Ergebnis: Befunde nach `react_score` sortiert, je Befund Video-Link, Hitze-Zahlen,
+Claim-Zitat, Ampel + Begründung, Belege als klickbare Links. Du schreibst also nur
+`befunde.json` von Hand — den Report erzeugt das Modul.
 
 ## Ehrlichkeits-Regeln (nicht verhandelbar)
 

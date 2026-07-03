@@ -27,7 +27,11 @@ def fetch_recent(handle: str, n: int = 6, timeout: int = 180) -> dict:
     if p.returncode != 0 or not p.stdout.strip():
         last = p.stderr.strip().splitlines()[-1] if p.stderr.strip() else f"rc={p.returncode}"
         return {"handle": handle, "error": last, "videos": []}
-    data = json.loads(p.stdout)
+    try:
+        data = json.loads(p.stdout)
+    except json.JSONDecodeError:
+        # yt-dlp can return a non-JSON body (rate-limit/HTML page) with rc=0
+        return {"handle": handle, "error": "invalid_json_response", "videos": []}
     vids = []
     for e in (data.get("entries") or []):
         if not e:

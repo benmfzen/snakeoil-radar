@@ -3,7 +3,7 @@
 Uses NCBI PubMed E-utilities (free, no API key, ~3 req/s polite limit).
 The hard rule this module enforces: a verdict may only cite what this module
 actually returned. If no evidence comes back, the claim is UNVERIFIED — never
-invent a citation. (Same fail-closed pattern as the Warhammer verify.py gate.)
+invent a citation. Fail closed.
 """
 import json, time, subprocess, urllib.parse
 

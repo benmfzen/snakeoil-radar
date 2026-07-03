@@ -52,8 +52,9 @@ Every verdict carries a PMID + link. A claim with no retrievable evidence comes 
 
 ```bash
 # 1. Prerequisites (one-time)
-pip install -U yt-dlp        # curl + python3 ship with macOS/Linux
+pip install -r requirements.txt       # yt-dlp; curl + python3 ship with macOS/Linux
 cd engine && python3 -m radar.setup   # optional: pulls local Whisper (free, no key)
+python3 -m tests.test_core            # optional: run the offline test suite
 
 # 2. Create your config — the watchlist ships EMPTY; you add your own handles
 cp config/config.example.json config/config.json
@@ -82,6 +83,7 @@ engine/radar/
   setup.py              pulls faster-whisper + model (one-time, on-device, free)
   evidence.py           PubMed E-utilities: prefers meta-analyses/reviews, fail-closed
   pipeline.py           CLI: everything up to shortlist.json
+  render_report.py      befunde.json -> report.md (deterministic, always in sync)
 SKILL.md                the actual "code": the process the agent follows
 presets/                domain vocabulary (optional)
 out/                    shortlist.json -> befunde.json + report.md

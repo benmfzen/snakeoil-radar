@@ -4,6 +4,17 @@ import json, sys
 AMPEL = {"rot": "🔴", "gelb": "🟡", "gruen": "🟢", "unverified": "⚪"}
 
 
+def _n(x):
+    """Thousands-separated int, but never crash on a missing/non-numeric value."""
+    return f"{x:,}" if isinstance(x, (int, float)) and not isinstance(x, bool) else str(x if x is not None else "?")
+
+
+def _ampel(v):
+    """Normalise the verdict key so 'grün', 'GRÜN', 'UNVERIFIED' etc. still map."""
+    k = str(v).strip().lower().replace("ü", "ue").replace("ä", "ae").replace("ö", "oe")
+    return AMPEL.get(k, "⚪")
+
+
 def render(befunde_path: str) -> str:
     d = json.load(open(befunde_path, encoding="utf-8"))
     b = sorted(d["befunde"], key=lambda x: x.get("react_score", 0), reverse=True)
@@ -12,17 +23,17 @@ def render(befunde_path: str) -> str:
     out.append("")
     for i, f in enumerate(b, 1):
         v, h = f["video"], f["hitze"]
-        out.append(f"## {i}. {AMPEL.get(f['ampel'],'')} {f['claim_paraphrase']}")
+        out.append(f"## {i}. {_ampel(f['ampel'])} {f['claim_paraphrase']}")
         out.append(f"**@{v['handle']}** · [{v['title'][:70]}]({v['url']})  ")
-        out.append(f"👁 {h['views']:,} Views · ⚡ {h['velocity']:,}/Tag · 🌡 heat {h['heat']:,} "
-                   f"· Baseline {h.get('baseline_views','?'):,} · {v['age_days']}d alt  ")
-        out.append(f"**react_score: {f['react_score']:,}**")
+        out.append(f"👁 {_n(h.get('views'))} Views · ⚡ {_n(h.get('velocity'))}/Tag · 🌡 heat {_n(h.get('heat'))} "
+                   f"· Baseline {_n(h.get('baseline_views'))} · {v.get('age_days','?')}d alt  ")
+        out.append(f"**react_score: {_n(f.get('react_score'))}**")
         out.append("")
         out.append(f"> „{f['claim']}\"")
         out.append("")
         m = f["misrat"]
         flags = [k for k, val in m.items() if val]
-        out.append(f"**Verdikt {AMPEL.get(f['ampel'],'')} {f['ampel'].upper()}** "
+        out.append(f"**Verdikt {_ampel(f['ampel'])} {str(f['ampel']).upper()}** "
                    f"{'· MisRAT: '+', '.join(flags) if flags else '· keine MisRAT-Flags'}  ")
         out.append(f"{f['begruendung']}")
         out.append("")

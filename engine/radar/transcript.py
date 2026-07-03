@@ -31,6 +31,10 @@ def whisper_transcribe(url, lang="de", model_size="small", timeout=300):
     Better quality than TikTok's auto-captions (esp. German) and covers videos
     that have no captions at all. Free — no API, no per-video cost.
     """
+    # Fail fast (before downloading audio) if the model backend isn't installed.
+    import importlib.util
+    if importlib.util.find_spec("faster_whisper") is None:
+        return {"ok": False, "reason": "whisper_not_installed"}
     with tempfile.TemporaryDirectory() as td:
         tmpl = os.path.join(td, "a.%(ext)s")
         try:
@@ -88,12 +92,23 @@ def fetch_transcript(url: str, timeout: int = 120, lang_preference: list = None,
     """
     with tempfile.TemporaryDirectory() as td:
         out = os.path.join(td, "v")
-        p = subprocess.run(
-            ["yt-dlp", "--skip-download", "--write-subs", "--write-auto-subs",
-             "--sub-langs", "all", "--sub-format", "vtt",
-             "--socket-timeout", "30", "-o", out, url],
-            capture_output=True, text=True, timeout=timeout,
-        )
+        try:
+            p = subprocess.run(
+                ["yt-dlp", "--skip-download", "--write-subs", "--write-auto-subs",
+                 "--sub-langs", "all", "--sub-format", "vtt",
+                 "--socket-timeout", "30", "-o", out, url],
+                capture_output=True, text=True, timeout=timeout,
+            )
+        except subprocess.TimeoutExpired:
+            # one hanging video must not crash the whole pipeline run
+            if whisper_fallback:
+                try:
+                    w = whisper_transcribe(url, lang=whisper_lang, model_size=whisper_model)
+                    if w.get("ok"):
+                        return w
+                except Exception:
+                    pass
+            return {"ok": False, "reason": "timeout"}
         vtts = glob.glob(out + "*.vtt")
         if not vtts:
             reason = "no_captions"

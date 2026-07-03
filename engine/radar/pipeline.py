@@ -47,7 +47,7 @@ def run(config: dict, out_dir: str) -> dict:
 
     print(f"[3/3] Transkripte für Top {len(feed)} …", file=sys.stderr)
     langs = config.get("caption_lang_preference", [])
-    use_whisper = config.get("whisper_fallback", False)
+    use_whisper = config.get("whisper_fallback", True)
     for v in feed:
         t = fetch_transcript(
             v["url"], lang_preference=langs,
