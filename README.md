@@ -1,80 +1,70 @@
 # 🐍 snakeoil-radar
 
-**Ein Reaktions-Radar für viralen Gesundheits-Bullshit — als Claude-Code-Skill, nicht als App.**
+**A reaction radar for viral health misinformation — as a Claude Code skill.**
 
-Spürt „Snake Oil" auf: reichweitenstarke Videos mit Falschaussagen, bevor alle anderen
-reagiert haben — und hält jede Behauptung gegen echte Studien, statt gegen Bauchgefühl.
+Watches a self-maintained **watchlist** of TikTok creator handles, ranks their fresh
+videos by heat (view velocity × engagement × account baseline), pulls transcripts, and
+checks the concrete factual claims against **real PubMed literature**. A traffic-light
+verdict (🟢🟡🔴) is only issued with a retrievable source (PMID + link); otherwise the
+claim is marked `UNVERIFIED`.
 
-Beobachtet eine selbst gepflegte **Watchlist** von TikTok-Creator-Handles, rankt deren
-frische Videos nach Hitze (Views-Velocity × Engagement × Account-Baseline), zieht
-Transkripte und prüft die konkreten Tatsachenbehauptungen gegen **echte PubMed-Literatur**
-— Ampel-Verdikt (🟢🟡🔴) nur mit abrufbarer Quelle (PMID + Link), sonst `UNVERIFIED`.
-
-Kostenlos: `yt-dlp` + `curl` + PubMed E-utilities. Keine API-Keys, keine Abos.
-
-## Warum Skill statt App?
-
-Plattform-Scraping bricht ständig — TikTok tauscht die Schlösser, Tools sterben.
-Eine App darauf ist an Tag 1 veraltet und danach ein Pflegefall. Ein Skill ist ein
-**Prozess**: die deterministischen Teile sind dünne Scripts, die man in Minuten an
-neue Community-Releases anpasst; das Urteil fällt der Agent nach festen Ehrlichkeits-
-Regeln. Wächst mit, statt zu verrotten.
+Free to run: `yt-dlp` + `curl` + PubMed E-utilities. No API keys, no subscriptions.
 
 ## Quickstart
 
 ```bash
-# 1. Voraussetzungen (einmalig)
-pip install -U yt-dlp        # curl + python3 sind auf macOS/Linux schon da
-cd engine && python3 -m radar.setup   # optional: zieht lokales Whisper (gratis, kein Key)
+# 1. Prerequisites (one-time)
+pip install -U yt-dlp        # curl + python3 ship with macOS/Linux
+cd engine && python3 -m radar.setup   # optional: pulls local Whisper (free, no key)
 
-# 2. Config anlegen — Watchlist ist bewusst LEER, du trägst deine Handles selbst ein
+# 2. Create your config — the watchlist ships EMPTY; you add your own handles
 cp config/config.example.json config/config.json
 #    "watchlist": ["@handle1", "@handle2", ...]
 
-# 3. Pipeline (deterministisch): Discovery -> Triage -> Transkripte
+# 3. Pipeline (deterministic): discovery -> triage -> transcripts
 cd engine && python3 -m radar.pipeline --config ../config/config.json --out ../out
 
-# 4. Faktencheck (agentisch): In Claude Code den Skill laufen lassen —
-#    er liest out/shortlist.json, extrahiert Claims, holt PubMed-Belege
-#    und schreibt out/befunde.json + out/report.md
+# 4. Fact-check (agentic): run the skill in Claude Code —
+#    it reads out/shortlist.json, extracts claims, fetches PubMed evidence,
+#    and writes out/befunde.json + out/report.md
 ```
 
-Der komplette Prozess inkl. Verdikt-Regeln steht in [SKILL.md](SKILL.md).
-Themen-Presets (Vokabular + Suchbegriffe) in [presets/](presets/) — Ernährung (DE)
-liegt als Beispiel bei; das Radar selbst ist themen-agnostisch.
+The full process and verdict rules live in [SKILL.md](SKILL.md). Topic presets
+(vocabulary + search terms) live in [presets/](presets/) — a German nutrition preset is
+included as an example; the radar itself is topic-agnostic.
 
-## Architektur
+## Architecture
 
 ```
-config/config.json      deine Watchlist (Onboarding, nie mitgeliefert)
+config/config.json      your watchlist (onboarding, never shipped)
 engine/radar/
-  discovery.py          Profil-Feeds je Handle (yt-dlp) — die "offene Tür"
-  triage.py             Heat = velocity × (1+engagement) × rel_reach; Frische-Filter
-  transcript.py         TikTok-Captions -> Text; lokales Whisper-Fallback ohne Captions
-  setup.py              zieht faster-whisper + Modell (einmalig, on-device, gratis)
-  evidence.py           PubMed E-utilities: Meta-Analysen/Reviews bevorzugt, fail-closed
-  pipeline.py           CLI: alles bis shortlist.json
-SKILL.md                der eigentliche "Code": der Prozess für den Agenten
-presets/                Domänen-Vokabular (optional)
+  discovery.py          per-handle profile feeds (yt-dlp)
+  triage.py             heat = velocity × (1+engagement) × rel_reach; freshness filter
+  transcript.py         TikTok captions -> text; local Whisper fallback when absent
+  setup.py              pulls faster-whisper + model (one-time, on-device, free)
+  evidence.py           PubMed E-utilities: prefers meta-analyses/reviews, fail-closed
+  pipeline.py           CLI: everything up to shortlist.json
+SKILL.md                the actual "code": the process the agent follows
+presets/                domain vocabulary (optional)
 out/                    shortlist.json -> befunde.json + report.md
 ```
 
-## Design-Entscheidungen (ehrlich)
+## Design decisions
 
-- **By-creator statt by-topic:** TikToks Themensuche ist für freie Tools verriegelt
-  (`tiktok:tag` broken), Profil-Feeds sind stabil. Die Watchlist ist eine redaktionelle
-  Entscheidung des Nutzers — und genau deshalb nicht Teil des Repos.
-- **Baseline statt Follower:** Follower-Zahlen liefert die Plattform nicht sauber und
-  sie sind kaufbar. Median-Views der letzten Posts messen echte aktuelle Reichweite.
-- **Fail-closed Faktencheck:** zitiert wird nur, was die Evidenz-Suche wirklich
-  zurückgab. Lieber `UNVERIFIED` als eine halluzinierte Studie.
-- **Eine Plattform sauber statt drei wackelig:** virale Clips sind fast immer
-  cross-gepostet; TikTok-Abdeckung fängt die IG/Shorts-Spiegel inhaltlich mit.
+- **By-creator, not by-topic.** TikTok's topic search is locked down for free tools
+  (`tiktok:tag` is broken); profile feeds are stable. The watchlist is the user's
+  editorial choice — and therefore not part of this repo.
+- **Baseline instead of follower count.** The platform doesn't expose follower counts
+  cleanly and they can be bought. Median views of recent posts measure actual reach.
+- **Fail-closed fact-checking.** Only what the evidence search actually returned gets
+  cited. `UNVERIFIED` beats a hallucinated study.
+- **One platform done well over three done shakily.** Viral clips are almost always
+  cross-posted; covering TikTok catches the IG/Shorts mirrors by content.
 
-## Grenzen
+## Limitations
 
-Sehr frische Videos (<1 Tag) haben oft noch keine Captions — lokales Whisper
-transkribiert sie dann on-device (gratis), sonst greift der nächste Lauf.
-Völlig neue Accounts erscheinen erst, wenn sie auf die Watchlist kommen.
-PubMed deckt Biomedizin ab — für andere Domänen (Finanzen etc.) das Evidenz-Modul
-gegen eine passende Quelle tauschen (der Rest des Prozesses bleibt identisch).
+Very fresh videos (<1 day) often have no captions yet — local Whisper transcribes them
+on-device (free), otherwise the next run picks them up. Brand-new accounts only appear
+once they're added to the watchlist. PubMed covers biomedicine; for other domains
+(finance, etc.) swap the evidence module for a suitable source — the rest of the process
+stays identical.
