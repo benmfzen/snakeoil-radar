@@ -1,0 +1,9 @@
+{
+  "_hinweis": "Kopiere diese Datei zu config.json und trage DEINE Watchlist ein. Die Liste wird bewusst leer ausgeliefert — wen du beobachtest, ist deine redaktionelle Entscheidung (Onboarding-Schritt des Skills).",
+  "watchlist": [],
+  "videos_per_account": 6,
+  "max_age_days": 14,
+  "top_n": 8,
+  "caption_lang_preference": [],
+  "_hinweis_captions": "Optional: bevorzugte Caption-Sprachen, z.B. [\"deu\",\"de\"] — TikTok liefert bei nicht-englischen Creators sonst die verstümmelte Auto-Übersetzung."
+}
